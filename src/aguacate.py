@@ -15,10 +15,10 @@ class Template(object):
 		super(Template, self).__init__()
 		self.args = args
 		#Suscribrirse a la camara
-		self.Sub_Cam = rospy.Subscriber("/usb_cam/image_raw", Image, self.procesar_img) #benjadoc: este el topico del usb_cam del compu
+		self.Sub_Cam = rospy.Subscriber("/duckiebot/camera_node/image/raw", Image, self.procesar_img) #benjadoc: este el topico del usb_cam del compu
         #Publicar imagen(es)
 		self.pub_img = rospy.Publisher("hola", Image, queue_size = 1) #benjadoc: aqui me invente cualquier topico
-		#self.pub_img = rospy.Publisher("mas", Image, queue_size = 1)
+		self.pub_posc = rospy.Publisher("/duckiebot/posicion_pato", Point, queue_size = 1)
 
 
 	def procesar_img(self, msg):
@@ -39,8 +39,8 @@ class Template(object):
 
 		#Definir rangos para la mascara
 
-		lower_limit = np.array([25, 100, 0])
-		upper_limit =np.array([35, 255 ,255]) #benjadoc: estos limites son para el amarillo, de ahi se pueden hacer mas para otros colores
+		lower_limit = np.array([20, 100, 0])
+		upper_limit =np.array([40, 255 ,255]) #benjadoc: estos limites son para el amarillo, de ahi se pueden hacer mas para otros colores
 
 		#Mascara
 		mask = cv2.inRange(image_out, lower_limit, upper_limit)
@@ -52,13 +52,16 @@ class Template(object):
 		img_dilate = cv2.dilate(img_erode, kernel, iterations=1) #Dilatar 
 
 		# Definir blobs
-		contours, hierarchy = cv2.findContours(img_dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) #benjadoc: aqui habia que eliminar un _, que habia antes del contours
+		_,contours, hierarchy = cv2.findContours(img_dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) #benjadoc: aqui habia que eliminar un _, que habia antes del contours
 		for cnt in contours:
 			AREA = cv2.contourArea(cnt)
-			if AREA>150: #Filtrar por tramo de blobs #benjadoc: aumente el area, pq o si no se hacian demasiadas weas chicas
+			if AREA>150 and AREA<1000: #Filtrar por tramo de blobs #benjadoc: aumente el area, pq o si no se hacian demasiadas weas chicas
 				x,y,w,h = cv2.boundingRect(cnt)
+				dist=Point()
+				dist.z=3*175/h
+				self.pub_posc.publish(dist)
 				cv2.rectangle(image, (x,y), (x+w,y+h), (0,0,100),2) #benjadoc: el tercer parametro habia que poner los x+ e y+
-				image = cv2.putText(image, str(round(2.5*840/h))+"cm", (x+round(w/2),y+round(h/2)),cv2.FONT_HERSHEY_SIMPLEX , 1, (255,0,0), 2, cv2.LINE_AA) #benjadoc: este es un metodo que encontre para poner texto en las imagenes
+				image = cv2.putText(image, str(round(3*175/h))+"cm", (int(round(x+w/2)),int(round(y+h/2))),cv2.FONT_HERSHEY_SIMPLEX , 1, (255,0,0), 2, cv2.LINE_AA) #benjadoc: este es un metodo que encontre para poner texto en las imagenes
 			else:
 				None
 

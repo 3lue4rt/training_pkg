@@ -39,8 +39,16 @@ class Template(object):
 
 		#Definir rangos para la mascara
 
-		lower_limit = np.array([1, 1, 1])
-		upper_limit =np.array([1, 1 ,1])
+		amarillo_feo_RGB=np.array([219,219,18])
+		amarillo_feo_BGR=np.array([18,219,219])
+		amarillo_feo_HSV=np.array([60,92,86])
+		variacion=np.array([20,20,100])
+		HSV_lower=np.array([10,100,100])
+		HSV_upper=np.array([40,250,250])
+
+
+		lower_limit =HSV_lower
+		upper_limit =HSV_upper
 
 		#Mascara
 		mask = cv2.inRange(image_out, lower_limit, upper_limit)
@@ -61,8 +69,11 @@ class Template(object):
 			else:
 				None
 
+		alturapato=2,5
+		
+
 		# Publicar imagen final
-		msg = bridge.cv2_to_imgmsg(image, "bgr8")
+		msg = bridge.cv2_to_imgmsg(image_out, "bgr8")
 		self.pub_img.publish(msg)
 
 def main():
