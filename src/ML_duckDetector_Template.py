@@ -9,9 +9,9 @@ class Nodo(object):
 	def __init__(self, args):
 		super(Nodo, self).__init__()
 		self.args = args
-		self.sub = rospy.Subscriber("camera topic", Image, self.callback)
-		self.detector = cv2.CascadeClassifier("path to cascade3_LBP.xml")
-		self.pub = rospy.Publisher("Image with detections topic", Image, queue_size=10)
+		self.sub = rospy.Subscriber("/duckiebot/camera_node/image/raw", Image, self.callback)
+		self.detector = cv2.CascadeClassifier("/home/duckiebot/duckietown/catkin_ws/src/training_pkg/src/cascade3_LBP.xml")
+		self.pub = rospy.Publisher("/duckiebot/ducktect", Image, queue_size=10)
 
 		self.bridge = CvBridge()
 
@@ -19,7 +19,7 @@ class Nodo(object):
 	def callback(self,msg):
 
 		image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-		image_gray = #Transformen de bgr a escala de grises!
+		image_gray =cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
 
 		dets = self.detector.detectMultiScale(image_gray, 1.3 , 10)
 		

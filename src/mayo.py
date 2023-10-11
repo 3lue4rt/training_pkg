@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#
 import rospy #importar ros para  python
 from std_msgs.msg import String, Int32 # importar mensajes de ROS tipo String y tipo Int32
 from geometry_msgs.msg import Twist, Point # importar mensajes de ROS tipo geometry / Twist
@@ -16,8 +16,7 @@ class Template(object):
 		self.args = args
 		#Suscribrirse a la camara
 		self.Sub_Cam = rospy.Subscriber("/duckiebot/camera_node/image/raw", Image, self.procesar_img) #benjadoc: este el topico del usb_cam del compu
-        #Publicar imagen(es)
-		self.pub_img = rospy.Publisher("hola", Image, queue_size = 1) #benjadoc: aqui me invente cualquier topico
+        #Publicar imagen(es) #benjadoc: aqui me invente cualquier topico
 		self.pub_posc = rospy.Publisher("/duckiebot/posicion_pato", Point, queue_size = 1)
 
 
